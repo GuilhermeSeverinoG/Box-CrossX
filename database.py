@@ -2,7 +2,7 @@ import sqlite3
 class AppBd():
     def __init__(self):
         self.create_table()
-    #Abindo conexão com o banco
+    #Conexão
     def abrirconexao(self):
         try:
             self.connect = sqlite3.connect("db/database.db")
@@ -43,4 +43,69 @@ class AppBd():
                 cursor.close()
                 self.connect.close()
                 print("A conexão com o SQLite foi fechada.")
-AppBd()
+    #Insert
+    def cadastrarAluno(self, nome, endereco, cidade, estado, telefone, data_matricula, data_desligamento, data_vencimento):
+        self.abrirconexao()
+        insert_query = """INSERT INTO aluno
+          (nome, endereco, cidade, estado, telefone, data_matricula, data_desligamento, data_vencimento) VALUES (?, ?,?, ?,?, ?,?, ?)"""
+        try:
+            cursor = self.connect.cursor()
+            cursor.execute(insert_query, (nome, endereco, cidade, estado, telefone, data_matricula, data_desligamento, data_vencimento))
+            print("Aluno cadastrado com sucesso!!")
+            self.connect.commit()
+        except sqlite3.Error as erro:
+            print("Falha ao inserir aluno")
+        finally:
+            if self.connect:
+                cursor.close()
+                self.connect.close()
+                print("A conexao com o sqlite foi fechada!!")
+    #Select
+    def selecionarAlunos(self):
+        self.abrirconexao()
+        select_query = """SELECT * FROM aluno"""
+        products = []
+        try:
+            cursor = self.connect.cursor()
+            cursor.execute(select_query)
+            products = cursor.fetchall() 
+        except  sqlite3.Error as error:
+                print("Falha ao retornar alunos", error)
+        finally:
+            if self.connect:
+                cursor.close()
+                self.connect.close()
+                print("A conexao com o sqlite foi fechada")
+        return products
+    def atualizarAluno(self, id_aluno, nome, endereco, cidade, estado, telefone):
+        self.abrirconexao()
+        update_query = """UPDATE aluno SET nome = ?, endereco = ?, cidade = ?, estado = ?, telefone = ? 
+        WHERE id_aluno = ?"""
+        try:
+            cursor = self.connect.cursor()
+            cursor.execute(update_query, (nome, endereco, cidade, estado, telefone, id_aluno))
+            self.connect.commit()
+            print("Produto atualizado com sucesso")
+        except sqlite3.Error as error:
+            print("Falha ao atualizar o produto",error)
+        finally:    
+            if self.connect:
+                cursor.close()
+                self.connect.close()
+                print("A conexão com o sqlite foi fechada.")
+    # Delete
+    def deletarAluno(self, id):
+        self.abrirconexao()
+        delete_query = """DELETE FROM aluno WHERE id_aluno=?"""
+        try:
+            cursor = self.connect.cursor()
+            cursor.execute(delete_query, (id,))
+            self.connect.commit()
+        except sqlite3.Error as error:
+            print("Falha ao deletar aluno")
+        finally:    
+            if self.connect:
+                cursor.close()
+                self.connect.close()
+                print("A conexão com o sqlite foi fechada.")
+app = AppBd()
