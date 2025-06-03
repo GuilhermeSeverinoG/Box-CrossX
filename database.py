@@ -108,4 +108,3 @@ class AppBd():
                 cursor.close()
                 self.connect.close()
                 print("A conexão com o sqlite foi fechada.")
-app = AppBd()
