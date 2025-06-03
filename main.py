@@ -6,39 +6,19 @@ class PrincipalBD():
     def __init__(self, win):
         self.objetoBanco = database.AppBd()
         self.janela = win
+        self.janela.title("Academia CrossX")
 
-        self.botaoNovaJanela = tk.Button(self.janela, text="Teste", command=self.abrir_janela)
-        self.botaoNovaJanela.pack(pady=10)
+        self.menu_principal = tk.Menu(self.janela)
+        self.janela.config(menu=self.menu_principal)
 
-        self.treeProdutos = ttk.Treeview(
-            self.janela,
-            columns=("id", "nome", "endereco", "cidade", "estado", "telefone"),
-            show='headings'
-        )
+        self.menu_principal.add_command(label="Gerenciar Alunos")
+        self.menu_principal.add_command(label="Pagamentos")
+        self.menu_principal.add_command(label="Histórico de Pagamentos")
 
-        self.treeProdutos.heading("id", text="ID do Aluno")
-        self.treeProdutos.heading("nome", text="Nome")
-        self.treeProdutos.heading("endereco", text="Endereço")
-        self.treeProdutos.heading("cidade", text="Cidade")
-        self.treeProdutos.heading("estado", text="Estado")
-        self.treeProdutos.heading("telefone", text="Telefone")
+    
 
-        self.treeProdutos.pack(fill="both", expand=True)
-
-    def abrir_janela(self):
-        nova = tk.Toplevel(self.janela)
-        nova.title("Nova Janela - Cadastro de Aluno")
-        nova.geometry("400x300")
-
-        tk.Label(nova, text="Aqui você pode colocar um formulário!").pack(pady=20)
-
-        tk.Label(nova, text="Nome:").pack()
-        entry_nome = tk.Entry(nova)
-        entry_nome.pack()
-
-        tk.Button(nova, text="Fechar", command=nova.destroy).pack(pady=10)
-
+# Janela principal
 janela = tk.Tk()
-product_app = PrincipalBD(janela)
 janela.geometry("900x700")
+app = PrincipalBD(janela)
 janela.mainloop()
