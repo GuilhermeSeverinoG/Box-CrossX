@@ -108,3 +108,21 @@ class AppBd():
                 cursor.close()
                 self.connect.close()
                 print("A conexão com o sqlite foi fechada.")
+
+    #Create do pagamento
+    def cadastrarPagamento(self, id_aluno, data, valor, tipo):
+        self.abrirconexao()
+        insert_query = """INSERT INTO pagamento (id_aluno, data, valor, tipo)
+                        VALUES (?, ?, ?, ?)"""
+        try:
+            cursor = self.connect.cursor()
+            cursor.execute(insert_query, (id_aluno, data, valor, tipo))
+            print("Pagamento cadastrado com sucesso!")
+            self.connect.commit()
+        except sqlite3.Error as erro:
+            print("Falha ao cadastrar pagamento:", erro)
+        finally:
+            if self.connect:
+                cursor.close()
+                self.connect.close()
+                print("A conexão com o SQLite foi fechada.")

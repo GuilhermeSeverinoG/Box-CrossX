@@ -129,15 +129,115 @@ class PrincipalBD():
             # self.campoDataDesligamento.delete(0, tk.END)
             # self.campoDataDesligamento.insert(0, valores[8])    
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def janelaAbrirPagamentos(self):
-        janela = tk.Toplevel(self.janela)
-        janela.title("Pagamentos")
-        janela.geometry("400x300")
+        janelaAbrirPagamentos = tk.Toplevel(self.janela)
+        janelaAbrirPagamentos.title("Pagamentos")
+        janelaAbrirPagamentos.geometry("600x500")
+
+        self.treePagamentos = ttk.Treeview(janelaAbrirPagamentos, columns=("ID", "Nome"), show="headings")
+        self.treePagamentos.heading("ID", text="ID")
+        self.treePagamentos.heading("Nome", text="Nome")
+        self.treePagamentos.column("ID", width=50)
+        self.treePagamentos.pack(pady=10)
+
+        try:
+            alunos = self.objetoBanco.selecionarAlunos()
+            for aluno in alunos:
+                self.treePagamentos.insert("", tk.END, values=(aluno[0], aluno[1]))
+        except Exception as e:
+            print("Erro ao carregar alunos:", e)
+
+        # Campos de pagamento
+        frameForm = tk.Frame(janelaAbrirPagamentos)
+        frameForm.pack(pady=10)
+
+        tk.Label(frameForm, text="ID do Aluno").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.entryIdAlunoPag = tk.Entry(frameForm)
+        self.entryIdAlunoPag.grid(row=0, column=1, padx=5, pady=5)
+
+        tk.Label(frameForm, text="Nome do Aluno").grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.entryNomeAlunoPag = tk.Entry(frameForm)
+        self.entryNomeAlunoPag.grid(row=1, column=1, padx=5, pady=5)
+
+        tk.Label(frameForm, text="Valor (R$)").grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.entryValorPag = tk.Entry(frameForm)
+        self.entryValorPag.grid(row=2, column=1, padx=5, pady=5)
+
+        tk.Label(frameForm, text="Tipo de Pagamento").grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        self.comboTipoPag = ttk.Combobox(frameForm, values=["Dinheiro", "Cartão"])
+        self.comboTipoPag.grid(row=3, column=1, padx=5, pady=5)
+        self.comboTipoPag.set("Dinheiro")
+
+        def preencherCamposPagamento(event):
+            item = self.treePagamentos.selection()
+            if item:
+                valores = self.treePagamentos.item(item[0], "values")
+                self.entryIdAlunoPag.delete(0, tk.END)
+                self.entryIdAlunoPag.insert(0, valores[0])
+                self.entryNomeAlunoPag.delete(0, tk.END)
+                self.entryNomeAlunoPag.insert(0, valores[1])
+
+        self.treePagamentos.bind("<<TreeviewSelect>>", preencherCamposPagamento)
+
+        frameBotoes = tk.Frame(janelaAbrirPagamentos)
+        frameBotoes.pack(pady=15)
+
+        btnCadastrarPag = tk.Button(frameBotoes, text="Cadastrar", command=self.cadastrarPagamento)
+        btnCadastrarPag.grid(row=0, column=0, padx=10)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def janelaHistoricoPagamentos(self):
         janela = tk.Toplevel(self.janela)
         janela.title("Histórico de Pagamentos")
         janela.geometry("400x300")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def exibirAlunos(self):
         try:
@@ -218,6 +318,37 @@ class PrincipalBD():
             print("Aluno excluído com sucesso.")
         except Exception as e:
             print("Não foi possível deletar:", e)
+
+
+
+
+
+
+
+    def cadastrarPagamento(self):
+        try:
+            id_aluno = self.entryIdAlunoPag.get()
+            valor = self.entryValorPag.get()
+            tipo = self.comboTipoPag.get()
+            data_pagamento = datetime.now().strftime("%d/%m/%Y")
+
+            if not id_aluno or not valor or not tipo:
+                print("Preencha todos os campos.")
+                return
+
+            self.objetoBanco.cadastrarPagamento(id_aluno, data_pagamento, valor, tipo)
+            print("Pagamento cadastrado com sucesso.")
+            
+            self.entryIdAlunoPag.delete(0, tk.END)
+            self.entryNomeAlunoPag.delete(0, tk.END)
+            self.entryValorPag.delete(0, tk.END)
+            self.comboTipoPag.set("Dinheiro")
+
+        except Exception as e:
+            print("Erro ao cadastrar pagamento:", e)
+
+
+
 
 # Janela principal
 janela = tk.Tk()
