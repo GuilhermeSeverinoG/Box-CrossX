@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tkinter import font
 import database
 
 class PrincipalBD():
@@ -8,13 +9,35 @@ class PrincipalBD():
         self.objetoBanco = database.AppBd()
         self.janela = win
         self.janela.title("Academia CrossX")
+        self.janela.geometry("800x600")
 
-        self.menu_principal = tk.Menu(self.janela)
-        self.janela.config(menu=self.menu_principal)
+        cor_menu = "#d3d3d3"
 
-        self.menu_principal.add_command(label="Gerenciar Alunos", command=self.janelaGerenciarAlunos)
-        self.menu_principal.add_command(label="Pagamentos", command=self.janelaAbrirPagamentos)
-        self.menu_principal.add_command(label="Histórico de Pagamentos", command=self.janelaHistoricoPagamentos)
+        barra_menu = tk.Frame(self.janela, bg=cor_menu, height=40)
+        barra_menu.pack(side=tk.TOP, fill=tk.X)
+
+        # Container central para os botões
+        container = tk.Frame(barra_menu, bg=cor_menu)
+        container.pack(expand=True)
+
+        btn_alunos = tk.Button(container, text="Gerenciar Alunos",
+                               bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaGerenciarAlunos)
+        btn_alunos.pack(side=tk.LEFT, padx=(10, 0), pady=5)
+
+        self._divisor(container)
+
+        btn_pagamentos = tk.Button(container, text="Pagamentos",
+                                   bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaAbrirPagamentos)
+        btn_pagamentos.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self._divisor(container)
+
+        btn_historico = tk.Button(container, text="Histórico de Pagamentos",
+                                  bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaHistoricoPagamentos)
+        btn_historico.pack(side=tk.LEFT, padx=5, pady=5)
+
+    def _divisor(self, frame):
+        tk.Label(frame, text="|", bg="#d3d3d3", fg="black", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
 
     #Janela principal
     def janelaGerenciarAlunos(self):
