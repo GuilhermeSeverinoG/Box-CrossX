@@ -41,57 +41,94 @@ class PrincipalBD():
         self.treeAlunos.column("Id aluno", width=60)
         self.treeAlunos.column("Estado", width=60)
         self.treeAlunos.pack()
+
+        self.treeAlunos.bind("<<TreeviewSelect>>", self.preencherCamposAluno)
+
         #Campos do formulário
         labelNome = tk.Label(janelaAlunos, text="Nome: ")
         labelNome.pack()
-        campoNome = tk.Entry(janelaAlunos)
-        campoNome.pack()
+        self.campoNome = tk.Entry(janelaAlunos)
+        self.campoNome.pack()
 
         labelEndereco= tk.Label(janelaAlunos, text="Endereço: ")
         labelEndereco.pack()
-        campoEndereco = tk.Entry(janelaAlunos)
-        campoEndereco.pack()
+        self.campoEndereco = tk.Entry(janelaAlunos)
+        self.campoEndereco.pack()
 
         labelCidade= tk.Label(janelaAlunos, text="Cidade: ")
         labelCidade.pack()
-        campoCidade = tk.Entry(janelaAlunos)
-        campoCidade.pack()
+        self.campoCidade = tk.Entry(janelaAlunos)
+        self.campoCidade.pack()
 
         labelEstado= tk.Label(janelaAlunos, text="Estado: ")
         labelEstado.pack()
-        campoEstado = tk.Entry(janelaAlunos)
-        campoEstado.pack()
+        self.campoEstado = tk.Entry(janelaAlunos)
+        self.campoEstado.pack()
 
         labelTelefone= tk.Label(janelaAlunos, text="Telefone: ")
         labelTelefone.pack()
-        campoTelefone = tk.Entry(janelaAlunos)
-        campoTelefone.pack()
+        self.campoTelefone = tk.Entry(janelaAlunos)
+        self.campoTelefone.pack()
 
         labelDataMatricula= tk.Label(janelaAlunos, text="Data de matrícula: ")
         labelDataMatricula.pack()
-        campoDataMatricula = tk.Entry(janelaAlunos)
-        campoDataMatricula.pack()
+        self.campoDataMatricula = tk.Entry(janelaAlunos)
+        self.campoDataMatricula.pack()
 
         labelDataVencimento= tk.Label(janelaAlunos, text="Data de vencimento: ")
         labelDataVencimento.pack()
-        campoDataVencimento = tk.Entry(janelaAlunos)
-        campoDataVencimento.pack()
+        self.campoDataVencimento = tk.Entry(janelaAlunos)
+        self.campoDataVencimento.pack()
 
         labelDataDesligamento= tk.Label(janelaAlunos, text="Data de desligamento: ")
         labelDataDesligamento.pack()
-        campoDataDesligamento = tk.Entry(janelaAlunos)
-        campoDataDesligamento.pack()
+        self.campoDataDesligamento = tk.Entry(janelaAlunos)
+        self.campoDataDesligamento.pack()
         #Botões
-        btnCadastrar= tk.Button(janelaAlunos,text="Cadatrar aluno")
+        btnCadastrar= tk.Button(janelaAlunos,text="Cadatrar aluno", command=self.cadastrarAluno)
         btnCadastrar.pack()
         
-        btnAtualizar= tk.Button(janelaAlunos,text="Atualizar")
+        btnAtualizar= tk.Button(janelaAlunos,text="Atualizar", command=self.atualizarAluno)
         btnAtualizar.pack()
 
-        btnExcluir= tk.Button(janelaAlunos,text="Excluir")
+        btnExcluir= tk.Button(janelaAlunos,text="Excluir", command=self.deletarAluno)
         btnExcluir.pack()
 
         self.exibirAlunos()
+
+    def preencherCamposAluno(self, event):
+        # Pega item selecionado
+        item = self.treeAlunos.selection()
+        if item:
+            valores = self.treeAlunos.item(item[0], "values")
+
+            # Armazena ID do aluno selecionado (importante para o UPDATE)
+            self.idSelecionado = valores[0]
+
+            # Preenche os campos
+            self.campoNome.delete(0, tk.END)
+            self.campoNome.insert(0, valores[1])
+
+            self.campoEndereco.delete(0, tk.END)
+            self.campoEndereco.insert(0, valores[2])
+
+            self.campoCidade.delete(0, tk.END)
+            self.campoCidade.insert(0, valores[3])
+
+            self.campoEstado.delete(0, tk.END)
+            self.campoEstado.insert(0, valores[4])
+
+            self.campoTelefone.delete(0, tk.END)
+            self.campoTelefone.insert(0, valores[5])
+
+            self.campoDataMatricula.delete(0, tk.END)
+            self.campoDataMatricula.insert(0, valores[6])
+
+            self.campoDataVencimento.delete(0, tk.END)
+            self.campoDataVencimento.insert(0, valores[7])
+
+            self.campoDataDesligamento.delete(0, tk.END)
+            self.campoDataDesligamento.insert(0, valores[8])    
 
     def janelaAbrirPagamentos(self):
         janela = tk.Toplevel(self.janela)
@@ -112,6 +149,63 @@ class PrincipalBD():
         except Exception as e:
             print("Não foi possível exibir os alunos:", e)
 
+    def cadastrarAluno(self):
+        try:
+            nome = self.campoNome.get()
+            endereco = self.campoEndereco.get()
+            cidade=self.campoCidade.get()
+            estado=self.campoEstado.get()
+            telefone=self.campoTelefone.get()
+            dataMatricula=self.campoDataMatricula.get()
+            dataVencimento=self.campoDataVencimento.get()
+            dataDesligamento=self.campoDataDesligamento.get()
+            self.objetoBanco.cadastrarAluno(nome,endereco,cidade,estado,telefone,dataMatricula,dataDesligamento,dataVencimento)
+            self.exibirAlunos()
+
+            self.campoNome.delete(0, tk.END)
+            self.campoEndereco.delete(0, tk.END)
+            self.campoCidade.delete(0, tk.END)
+            self.campoEstado.delete(0, tk.END)
+            self.campoTelefone.delete(0, tk.END)
+            self.campoDataMatricula.delete(0, tk.END)
+            self.campoDataVencimento.delete(0, tk.END)
+            self.campoDataDesligamento.delete(0, tk.END)
+            print("Aluno cadastrado com sucesso")
+        except:
+            print("Não foi possivel cadastrar")
+    def atualizarAluno(self):
+        try:
+            nome = self.campoNome.get()
+            endereco = self.campoEndereco.get()
+            cidade = self.campoCidade.get()
+            estado = self.campoEstado.get()
+            telefone = self.campoTelefone.get()
+            self.objetoBanco.atualizarAluno(self.idSelecionado, nome, endereco, cidade, estado, telefone)
+            self.exibirAlunos()
+
+            print("Aluno atualizado com sucesso")
+        except Exception as e:
+            print("Erro ao atualizar aluno:", e)
+
+    def deletarAluno(self):
+       try:
+            selected_item = self.treeAlunos.selection()
+            item = self.treeAlunos.item(selected_item)
+            product = item["values"]
+            product_id = product[0]
+            self.objetoBanco.deletarAluno(product_id)
+
+            self.campoNome.delete(0,tk.END)
+            self.campoEndereco.delete(0,tk.END)
+            self.campoCidade.delete(0,tk.END)
+            self.campoEstado.delete(0,tk.END)
+            self.campoTelefone.delete(0,tk.END)
+            self.campoDataMatricula.delete(0,tk.END)
+            self.campoDataVencimento.delete(0,tk.END)
+            self.campoDataDesligamento.delete(0,tk.END)
+            self.exibirAlunos()
+       except:
+          print("Nao foi possivel deletar!")
 #Janela princial
 janela = tk.Tk()
 janela.geometry("700x500")
