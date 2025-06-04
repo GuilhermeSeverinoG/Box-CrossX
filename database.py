@@ -43,6 +43,7 @@ class AppBd():
                 cursor.close()
                 self.connect.close()
                 print("A conexão com o SQLite foi fechada.")
+    #========== Métodos do CRUD do aluno ==========#
     #Insert
     def cadastrarAluno(self, nome, endereco, cidade, estado, telefone, data_matricula, data_desligamento, data_vencimento):
         self.abrirconexao()
@@ -77,23 +78,24 @@ class AppBd():
                 self.connect.close()
                 print("A conexao com o sqlite foi fechada")
         return products
-    def atualizarAluno(self, id_aluno, nome, endereco, cidade, estado, telefone):
+    #Update
+    def atualizarAluno(self, id_aluno, nome, endereco, cidade, estado, telefone, dataMatricula, dataDesligamento, dataVencimento):
         self.abrirconexao()
-        update_query = """UPDATE aluno SET nome = ?, endereco = ?, cidade = ?, estado = ?, telefone = ? 
+        update_query = """UPDATE aluno SET nome = ?, endereco = ?, cidade = ?, estado = ?, telefone = ?, data_matricula = ?, data_desligamento = ?, data_vencimento = ? 
         WHERE id_aluno = ?"""
         try:
             cursor = self.connect.cursor()
-            cursor.execute(update_query, (nome, endereco, cidade, estado, telefone, id_aluno))
+            cursor.execute(update_query, (nome, endereco, cidade, estado, telefone, dataMatricula, dataDesligamento, dataVencimento, id_aluno))
             self.connect.commit()
-            print("Produto atualizado com sucesso")
+            print("Aluno atualizado com sucesso")
         except sqlite3.Error as error:
-            print("Falha ao atualizar o produto",error)
+            print("Falha ao atualizar o aluno",error)
         finally:    
             if self.connect:
                 cursor.close()
                 self.connect.close()
                 print("A conexão com o sqlite foi fechada.")
-    # Delete
+    #Delete
     def deletarAluno(self, id):
         self.abrirconexao()
         delete_query = """DELETE FROM aluno WHERE id_aluno=?"""
@@ -108,7 +110,7 @@ class AppBd():
                 cursor.close()
                 self.connect.close()
                 print("A conexão com o sqlite foi fechada.")
-
+    #========== Métodos do CRUD do pagamento ==========#
     #Create do pagamento
     def cadastrarPagamento(self, id_aluno, data, valor, tipo):
         self.abrirconexao()
@@ -126,3 +128,36 @@ class AppBd():
                 cursor.close()
                 self.connect.close()
                 print("A conexão com o SQLite foi fechada.")
+    #Select
+    def selecionarPagamentos(self):
+        self.abrirconexao()
+        select_query = """SELECT * FROM pagamento"""
+        products = []
+        try:
+            cursor = self.connect.cursor()
+            cursor.execute(select_query)
+            products = cursor.fetchall() 
+        except  sqlite3.Error as error:
+                print("Falha ao retornar pagamentos", error)
+        finally:
+            if self.connect:
+                cursor.close()
+                self.connect.close()
+                print("A conexao com o sqlite foi fechada")
+        return products
+    #Update
+    def atualizarPagamento(self, id_pagamento,data,valor,tipo):
+        self.abrirconexao()
+        update_query = """UPDATE pagamento SET data = ?, valor = ?, tipo = ? WHERE id_pagamento = ?"""
+        try:
+            cursor = self.connect.cursor()
+            cursor.execute(update_query, (data,valor,tipo))
+            self.connect.commit()
+            print("Pagamento atualizado com sucesso")
+        except sqlite3.Error as error:
+            print("Falha ao atualizar o pagamento",error)
+        finally:    
+            if self.connect:
+                cursor.close()
+                self.connect.close()
+                print("A conexão com o sqlite foi fechada.")
