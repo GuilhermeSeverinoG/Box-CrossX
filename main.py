@@ -2,78 +2,115 @@ from datetime import datetime, timedelta
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter import font
+from PIL import Image, ImageTk
+
 import database
 
 class PrincipalBD():
+    #========== Janelas ==========#
+    #Janela principal
     def __init__(self, win):
         self.objetoBanco = database.AppBd()
         self.janela = win
         self.janela.title("Academia CrossX")
         self.janela.geometry("800x600")
+        self.janela.configure(bg="white")
 
         cor_menu = "#d3d3d3"
 
         barra_menu = tk.Frame(self.janela, bg=cor_menu, height=40)
         barra_menu.pack(side=tk.TOP, fill=tk.X)
 
-        # Container central para os botões
+        #Conteiner ods botões do menu
         container = tk.Frame(barra_menu, bg=cor_menu)
         container.pack(expand=True)
 
-        btn_alunos = tk.Button(container, text="Gerenciar Alunos",
-                               bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaGerenciarAlunos)
+        btn_alunos = tk.Button(container, text="Gerenciar Alunos",bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaGerenciarAlunos)
         btn_alunos.pack(side=tk.LEFT, padx=(10, 0), pady=5)
 
-        self._divisor(container)
+        self.divisor(container)
 
-        btn_pagamentos = tk.Button(container, text="Pagamentos",
-                                   bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaAbrirPagamentos)
+        btn_pagamentos = tk.Button(container, text="Pagamentos", bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaAbrirPagamentos)
         btn_pagamentos.pack(side=tk.LEFT, padx=5, pady=5)
 
-        self._divisor(container)
+        self.divisor(container)
 
-        btn_historico = tk.Button(container, text="Histórico de Pagamentos",
-                                  bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaHistoricoPagamentos)
+        btn_historico = tk.Button(container, text="Histórico de Pagamentos",bg=cor_menu, bd=0, relief=tk.FLAT, command=self.janelaHistoricoPagamentos)
         btn_historico.pack(side=tk.LEFT, padx=5, pady=5)
 
-    def _divisor(self, frame):
+        self.colocarImagemCentral()
+
+    def divisor(self, frame):#Divisor decorativo do menu
         tk.Label(frame, text="|", bg="#d3d3d3", fg="black", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
 
-    #Janela principal
+    def colocarImagemCentral(self):#Logo da empresa no meio da janela
+        imagem = Image.open("imgs/logo.png")
+        imagem = imagem.resize((400, 400), Image.Resampling.LANCZOS)
+        imagem_tk = ImageTk.PhotoImage(imagem) #Converter para tkinter
+        label_imagem = tk.Label(self.janela, image=imagem_tk, bg="white")
+        label_imagem.image = imagem_tk
+        label_imagem.pack(expand=True) #centralizar
+
+    #Janela dos alunos
     def janelaGerenciarAlunos(self):
         janelaAlunos = tk.Toplevel(self.janela)
         janelaAlunos.title("Gerenciar Alunos")
-        janelaAlunos.geometry("1000x500")
+        janelaAlunos.geometry("1000x600")
+        janelaAlunos.configure(bg="white")
 
-        # Tabela
+        estilo = ttk.Style()
+        estilo.theme_use("default")
+
+        estilo.configure("Treeview.Heading", background="#d3d3d3", foreground="black",font=("Arial", 10),relief="flat")
+
+        estilo.configure("Treeview",background="#f4f4f4",foreground="black",fieldbackground="#f4f4f4", font=("Arial", 10))
+
+        estilo.map("Treeview", background=[("selected", "#ccc")])
+
+        #Tabela
         self.treeAlunos = ttk.Treeview(
             janelaAlunos,
             columns=("Id aluno", "Nome", "Endereco", "Cidade", "Estado", "Telefone", "Data Matricula", "Data Desligamento", "Data Vencimento"),
             show='headings'
         )
 
+        col_largura = {
+            "Id aluno": 60,
+            "Nome": 120,
+            "Endereco": 120,
+            "Cidade": 120,
+            "Estado": 60,
+            "Telefone": 120,
+            "Data Matricula": 120,
+            "Data Desligamento": 120,
+            "Data Vencimento": 120
+        }
+
         for col in self.treeAlunos["columns"]:
-            self.treeAlunos.heading(col, text=col)
-            self.treeAlunos.column(col, width=100)
-        self.treeAlunos.column("Id aluno", width=60)
-        self.treeAlunos.column("Estado", width=60)
+            largura = col_largura.get(col, 100)
+            self.treeAlunos.heading(col, text=col, anchor="center")
+            self.treeAlunos.column(col, width=largura, anchor="center")
+
         self.treeAlunos.pack()
 
-        #Prenchimento de campos
+        #Tabela: preenchimento de campos da tabela
         self.treeAlunos.bind("<<TreeviewSelect>>", self.preencherCamposAluno)
 
-        # Campos do formulário
-        self.campoNome = tk.Entry(janelaAlunos)
-        self.campoEndereco = tk.Entry(janelaAlunos)
-        self.campoCidade = tk.Entry(janelaAlunos)
+        #Formulário
+        #Formulário: campos do formulário
+        self.campoNome = tk.Entry(janelaAlunos, width=25, bg="#f4f4f4")
+        self.campoEndereco = tk.Entry(janelaAlunos, width=25, bg="#f4f4f4")
+        self.campoCidade = tk.Entry(janelaAlunos, width=25, bg="#f4f4f4")
         estados_brasil = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA","MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
-        self.campoEstado = ttk.Combobox(janelaAlunos, values=estados_brasil, state="readonly")
-        self.campoTelefone = tk.Entry(janelaAlunos)
-        self.campoDataMatricula = tk.Entry(janelaAlunos)
-        self.campoDataDesligamento = tk.Entry(janelaAlunos)
-        self.campoDataVencimento = tk.Entry(janelaAlunos)
+        self.campoEstado = ttk.Combobox(janelaAlunos, values=estados_brasil, state="readonly", width=25)
+        estilo = ttk.Style()
+        estilo.configure('TCombobox', fieldbackground='#f4f4f4')
+        self.campoTelefone = tk.Entry(janelaAlunos, width=25, bg="#f4f4f4")
+        self.campoDataMatricula = tk.Entry(janelaAlunos, width=25, bg="#f4f4f4")
+        self.campoDataDesligamento = tk.Entry(janelaAlunos, width=25, bg="#f4f4f4")
+        self.campoDataVencimento = tk.Entry(janelaAlunos, width=25, bg="#f4f4f4")
 
-        #Criando as labels
+        #Fromulário: labels
         for label, entry in [
             ("Nome", self.campoNome),
             ("Endereço", self.campoEndereco),
@@ -87,14 +124,33 @@ class PrincipalBD():
             tk.Label(janelaAlunos, text=f"{label}:").pack()
             entry.pack()
 
-        #Botões
-        tk.Button(janelaAlunos, text="Cadastrar aluno", command=self.cadastrarAluno).pack()
-        tk.Button(janelaAlunos, text="Atualizar", command=self.atualizarAluno).pack()
-        tk.Button(janelaAlunos, text="Excluir", command=self.deletarAluno).pack()
+        #Formulário: botões
+        botoes_frame = tk.Frame(janelaAlunos)
+        botoes_frame.pack(pady=10)
+        btn_cadastrar = tk.Button(
+            botoes_frame, text="Cadastrar aluno", bg="#4CAF50", fg="white",
+            width=20, bd=0, relief=tk.FLAT,
+            command=self.cadastrarAluno
+        )
+        btn_cadastrar.pack(side=tk.LEFT, padx=5)
 
-        self.exibirAlunos()
+        btn_atualizar = tk.Button(
+            botoes_frame, text="Atualizar", bg="#FFC107", fg="black",
+            width=20, bd=0, relief=tk.FLAT,
+            command=self.atualizarAluno
+        )
+        btn_atualizar.pack(side=tk.LEFT, padx=5)
 
-    #Método para preencher os textfields da janela de alunos
+        btn_excluir = tk.Button(
+            botoes_frame, text="Excluir", bg="#F44336", fg="white",
+            width=20, bd=0, relief=tk.FLAT,
+            command=self.deletarAluno
+        )
+        btn_excluir.pack(side=tk.LEFT, padx=5)
+
+        self.exibirAlunos()#Método de mostrar os alunos
+
+    #Janela dos alunos: método para preencher os textfields da janela de alunos
     def preencherCamposAluno(self, event):
         item = self.treeAlunos.selection()
         if item:
@@ -109,15 +165,28 @@ class PrincipalBD():
     def janelaAbrirPagamentos(self):
         janelaAbrirPagamentos = tk.Toplevel(self.janela)
         janelaAbrirPagamentos.title("Pagamentos")
-        janelaAbrirPagamentos.geometry("600x500")
+        janelaAbrirPagamentos.geometry("600x550")
+        janelaAbrirPagamentos.configure(bg="white")
+
+        estilo = ttk.Style()
+        estilo.theme_use("default")
+        estilo.configure("Treeview.Heading",background="#d3d3d3",foreground="black",font=("Arial", 10),relief="flat")
+        estilo.configure("Treeview",background="#f4f4f4",foreground="black",fieldbackground="#f4f4f4",font=("Arial", 10))
+        estilo.map("Treeview", background=[("selected", "#ccc")])
 
         #Tabela
-        self.treePagamentos = ttk.Treeview(janelaAbrirPagamentos, columns=("ID", "Nome"), show="headings")
+        self.treePagamentos = ttk.Treeview(
+            janelaAbrirPagamentos,
+            columns=("ID", "Nome"),
+            show="headings"
+        )
         self.treePagamentos.heading("ID", text="ID")
         self.treePagamentos.heading("Nome", text="Nome")
-        self.treePagamentos.column("ID", width=50)
-        self.treePagamentos.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+        self.treePagamentos.column("ID", width=20, anchor="center")
+        self.treePagamentos.column("Nome", width=100, anchor="center")
+        self.treePagamentos.pack(padx=10, pady=10, fill="x")
 
+        #Janela dos pagamentos: método para preencher campos
         def preencherCamposPagamento(event):
             item = self.treePagamentos.selection()
             if item:
@@ -126,9 +195,9 @@ class PrincipalBD():
                 self.campoId.insert(0, valores[0])
                 self.campoNomeAluno.delete(0, tk.END)
                 self.campoNomeAluno.insert(0, valores[1])
-        #Função para preencher textfiels
         self.treePagamentos.bind("<<TreeviewSelect>>", preencherCamposPagamento)
 
+        #Selecionar alunos do banco
         try:
             alunos = self.objetoBanco.selecionarAlunos()
             for aluno in alunos:
@@ -136,68 +205,93 @@ class PrincipalBD():
         except Exception as e:
             print("Erro ao carregar alunos:", e)
 
-        #Formulário
-        self.campoId = tk.Entry(janelaAbrirPagamentos)
-        self.campoNomeAluno = tk.Entry(janelaAbrirPagamentos)
-        self.valor = tk.Entry(janelaAbrirPagamentos)
-        self.tipo = ttk.Combobox(janelaAbrirPagamentos, values=["dinheiro", "cartão"])
+        #Formulário: cmapos
+        self.campoId = tk.Entry(janelaAbrirPagamentos, bg="#f4f4f4")
+        self.campoNomeAluno = tk.Entry(janelaAbrirPagamentos, bg="#f4f4f4")
+        self.valor = tk.Entry(janelaAbrirPagamentos, bg="#f4f4f4")
+        self.tipo = ttk.Combobox(janelaAbrirPagamentos, values=["dinheiro", "cartão"], state="readonly", width=22)
+        estilo = ttk.Style()
+        estilo.configure('TCombobox', fieldbackground='#f4f4f4')
         self.tipo.set("dinheiro")
 
-        #Laço para criar labels
-        labels = ["ID do Aluno", "Nome do Aluno", "Valor (R$)", "Tipo de Pagamento"]
-        entries = [self.campoId, self.campoNomeAluno, self.valor, self.tipo]
-        for i, (label, widget) in enumerate(zip(labels, entries)):
-            tk.Label(janelaAbrirPagamentos, text=label).grid(row=i+1, column=0, padx=5, pady=5, sticky="e")
-            widget.grid(row=i+1, column=1, padx=5, pady=5, sticky="w")
+        #Formulário: labels
+        for label_text, widget in [
+            ("ID do Aluno", self.campoId),
+            ("Nome do Aluno", self.campoNomeAluno),
+            ("Valor (R$)", self.valor),
+            ("Tipo de Pagamento", self.tipo)
+        ]:
+            tk.Label(janelaAbrirPagamentos, text=label_text, bg="white").pack(pady=(10, 2))
+            widget.pack(ipadx=5, ipady=3)
 
-        #Botão de cadastrar
-        btnCadastrarPag = tk.Button(janelaAbrirPagamentos, text="Cadastrar", command=self.cadastrarPagamento)
-        btnCadastrarPag.grid(row=6, column=0, columnspan=2, pady=10)
+        #Formulário: botão
+        btnCadastrarPag = tk.Button(
+            janelaAbrirPagamentos,
+            text="Cadastrar",
+            bg="#4CAF50",
+            fg="white",
+            width=20,
+            bd=0,
+            relief=tk.FLAT,
+            command=self.cadastrarPagamento
+        )
+        btnCadastrarPag.pack(pady=20)
 
     #Janela do histórico de pagamentos
     def janelaHistoricoPagamentos(self):
-        #from tkinter import ttk  # Certifique-se de importar se estiver em outro escopo
         janela = tk.Toplevel(self.janela)
         janela.title("Histórico de Pagamentos")
-        janela.geometry("600x400")
+        janela.geometry("400x450")
+        janela.configure(bg="white")
 
-        #Campos
-        tk.Label(janela, text="ID Pagamento").grid(row=0, column=0)
-        id_pagamento_entry = tk.Entry(janela)
-        id_pagamento_entry.grid(row=0, column=1)
+        estilo = ttk.Style()
+        estilo.configure('TCombobox', fieldbackground='#f4f4f4')
 
-        tk.Label(janela, text="ID Aluno").grid(row=1, column=0)
-        id_aluno_entry = tk.Entry(janela)
-        id_aluno_entry.grid(row=1, column=1)
+        entrada_config = {"bg": "#f4f4f4", "relief": tk.GROOVE, "bd": 2, "font": ("Arial", 12), "width": 25}
+        #Formulário
+        tk.Label(janela, text="ID Pagamento", bg="white").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        id_pagamento_entry = tk.Entry(janela, **entrada_config)
+        id_pagamento_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        tk.Label(janela, text="Data").grid(row=2, column=0)
-        data_entry = tk.Entry(janela)
-        data_entry.grid(row=2, column=1)
+        tk.Label(janela, text="ID Aluno", bg="white").grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        id_aluno_entry = tk.Entry(janela, **entrada_config)
+        id_aluno_entry.grid(row=1, column=1, padx=5, pady=5)
 
-        tk.Label(janela, text="Valor").grid(row=3, column=0)
-        valor_entry = tk.Entry(janela)
-        valor_entry.grid(row=3, column=1)
+        tk.Label(janela, text="Data", bg="white").grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        data_entry = tk.Entry(janela, **entrada_config)
+        data_entry.grid(row=2, column=1, padx=5, pady=5)
 
-        tk.Label(janela, text="Tipo").grid(row=4, column=0)
-        tipo_entry = ttk.Combobox(janela, values=["dinheiro", "cartão"], state="readonly")
-        tipo_entry.grid(row=4, column=1)
-        tipo_entry.set("dinheiro")  # valor padrão
+        tk.Label(janela, text="Valor", bg="white").grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        valor_entry = tk.Entry(janela, **entrada_config)
+        valor_entry.grid(row=3, column=1, padx=5, pady=5)
 
-        # Tabela
+        tk.Label(janela, text="Tipo", bg="white").grid(row=4, column=0, padx=5, pady=5, sticky="e")
+        tipo_entry = ttk.Combobox(janela, values=["dinheiro", "cartão"], state="readonly", width=23)
+        tipo_entry.grid(row=4, column=1, padx=5, pady=5)
+        tipo_entry.set("dinheiro")
+
+        #Tabela
         self.treePagamentos = ttk.Treeview(
             janela,
-            columns=("id_pagamento", "id_aluno", "data", "valor", "tipo"),
+            columns=("ID pagamento", "ID aluno", "Data", "Valor", "Tipo"),
             show="headings"
         )
         for col in self.treePagamentos["columns"]:
             self.treePagamentos.heading(col, text=col)
-        self.treePagamentos.grid(row=5, column=0, columnspan=4, padx=10, pady=10)
+        self.treePagamentos.grid(row=5, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
-        #Seleção da tabela preenche os campos
+        #Decoração das colunas
+        self.treePagamentos.column("ID pagamento", width=60, anchor="center")
+        self.treePagamentos.column("ID aluno", width=60, anchor="center")
+        self.treePagamentos.column("Data", width=100, anchor="center")
+        self.treePagamentos.column("Valor", width=80, anchor="center")
+        self.treePagamentos.column("Tipo", width=80, anchor="center")
+
+        #Preencher
         def on_select(event):
             item = self.treePagamentos.selection()
             if item:
-                valores = self.treePagamentos.item(item, "values")
+                valores = self.treePagamentos.item(item[0], "values")
                 id_pagamento_entry.delete(0, tk.END)
                 id_pagamento_entry.insert(0, valores[0])
                 id_aluno_entry.delete(0, tk.END)
@@ -209,10 +303,6 @@ class PrincipalBD():
                 tipo_entry.set(valores[4])
 
         self.treePagamentos.bind("<<TreeviewSelect>>", on_select)
-
-        #Botões
-        tk.Button(janela, text="Atualizar", command=self.atualizarAluno).grid(row=6, column=1, pady=10)
-        tk.Button(janela, text="Excluir", command=self.deletarAluno).grid(row=6, column=2, pady=10)
 
         self.exibirPagamentos()
 
@@ -339,7 +429,7 @@ class PrincipalBD():
         except Exception as e:
             print("Não foi possível deletar:", e)
 
-    #========== Métodos do CRUD do pagegamento ==========#
+    #========== Métodos do CRUD do pagamento ==========#
     #Método Read
     def exibirPagamentos(self):
         try:
@@ -355,14 +445,23 @@ class PrincipalBD():
             id_aluno = self.campoId.get()
             valor = self.valor.get()
             tipo = self.tipo.get()
-            data_pagamento = datetime.now().strftime("%d/%m/%Y")
+            data_pagamento = datetime.now()
 
             if not id_aluno or not valor or not tipo:
                 messagebox.showerror("Erro", "Preencha todos os campos.")
                 return
 
-            self.objetoBanco.cadastrarPagamento(id_aluno, data_pagamento, valor, tipo)
-            print("Pagamento cadastrado com sucesso.")
+            data_formatada = data_pagamento.strftime("%d/%m/%Y")
+
+            self.objetoBanco.cadastrarPagamento(id_aluno, data_formatada, valor, tipo)
+
+            #Calcular nova data de vencimento
+            nova_data_vencimento = (data_pagamento + timedelta(days=30)).strftime("%d/%m/%Y")
+
+            #Atualizar aluno: nova data de vencimento e desligamento None
+            self.objetoBanco.atualizarMatriculaAposPagamento(id_aluno, nova_data_vencimento)
+
+            messagebox.showinfo("Sucesso","Pagamento cadastrado e matrícula atualizada com sucesso.")
 
             self.campoId.delete(0, tk.END)
             self.campoNomeAluno.delete(0, tk.END)

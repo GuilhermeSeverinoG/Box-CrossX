@@ -145,18 +145,18 @@ class AppBd():
                 self.connect.close()
                 print("A conexao com o sqlite foi fechada")
         return products
-    #Update
-    def atualizarPagamento(self, id_pagamento,data,valor,tipo):
+    #Atulizar desligamento e vencimento após pagar
+    def atualizarMatriculaAposPagamento(self, id_aluno, nova_data_vencimento):
         self.abrirconexao()
-        update_query = """UPDATE pagamento SET data = ?, valor = ?, tipo = ? WHERE id_pagamento = ?"""
+        update_query = """UPDATE aluno SET data_vencimento = ?, data_desligamento = NULL WHERE id_aluno = ?"""
         try:
             cursor = self.connect.cursor()
-            cursor.execute(update_query, (data,valor,tipo))
+            cursor.execute(update_query, (nova_data_vencimento, id_aluno))
             self.connect.commit()
-            print("Pagamento atualizado com sucesso")
+            print("Matrícula atualizada após pagamento com sucesso")
         except sqlite3.Error as error:
-            print("Falha ao atualizar o pagamento",error)
-        finally:    
+            print("Erro ao atualizar matrícula após pagamento:", error)
+        finally:
             if self.connect:
                 cursor.close()
                 self.connect.close()
